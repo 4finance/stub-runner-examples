@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/correlator"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/plain"
+    }
+  }
+}
