@@ -1,61 +1,60 @@
-apply plugin: 'maven-publish'
-apply plugin: 'groovy'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.ofg.uptodate'
+description = 'Root project for examples of stubs'
 
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
     }
-
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:+'
         classpath 'com.ofg:uptodate-gradle-plugin:1.1.0'
+        classpath "com.ofg:micro-common-release:+"
+    }
+    dependencies {
+        ant.unjar src: configurations.classpath.find {
+            it.name.startsWith("micro-common-release")
+        }, dest: 'build/release'
     }
 }
 
-group = 'com.ofg'
-description = 'Contains examples of stubs for the stub-runner'
-version = '0.0.6-SNAPSHOT'
+apply plugin: "base"
+apply from: "${rootProject.buildDir}/release/gradle/version.gradle"
 
-repositories {
-    mavenLocal()
-    jcenter()
-}
-
-dependencies {
-    testCompile 'org.codehaus.groovy:groovy-all:2.3.7'
-    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
-    testCompile 'com.github.tomakehurst:wiremock:1.51'
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
+scmVersion {
+    tag {
+        prefix = ''
     }
 }
 
-jar {
-    from "commitHash.txt"
-    from 'repository'
+subprojects {
+    group = 'com.ofg'
+    version = scmVersion.version
+
+    apply plugin: 'groovy'
+    apply from: "${rootProject.buildDir}/release/gradle/publish.gradle"
 }
 
-bintrayUpload.dependsOn 'build'
+apply from: "${rootProject.buildDir}/release/gradle/release.gradle"
 
-bintray {
-    user = System.properties['bintrayUser']
-    key = System.properties['bintrayKey']
+subprojects {
 
-    publications = ['mavenJava']
-    pkg {
-        repo = 'micro'
-        userOrg = '4finance'
-        name = project.name
-        desc = project.description
-        licenses = ['Apache-2.0']
-        labels = ['microservice']
+    apply plugin: 'com.ofg.uptodate'
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        testCompile 'org.codehaus.groovy:groovy-all:2.4.0'
+        testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+        testCompile 'com.github.tomakehurst:wiremock:1.53'
+    }
+    jar {
+        from "commitHash.txt"
+        from 'repository'
     }
 }
+
+wrapper {
+    gradleVersion '2.2.1'
+}
+
+

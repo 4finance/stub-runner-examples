@@ -1,0 +1,5 @@
+include 'twitter-places-collerator-stubs'
+include 'stub-runner-examples'
+
+rootProject.name = 'stub-runner-examples-root'
+
